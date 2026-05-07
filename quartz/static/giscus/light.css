@@ -35,7 +35,7 @@ main {
   --color-prettylights-syntax-sublimelinter-gutter-mark: #8c959f;
   --color-prettylights-syntax-constant-other-reference-link: #0a3069;
   --color-btn-text: #4e4e4e; /* --darkgray */
-  --color-btn-bg: rgba(0, 0, 0, 0.05); /* --light */
+  --color-btn-bg: #faf8f8; /* --light */
   --color-btn-border: rgb(43, 43, 43 / 15%); /* --dark */
   --color-btn-shadow: 0 1px 0 rgb(31 35 40 / 4%);
   --color-btn-inset-shadow: inset 0 1px 0 rgb(255 255 255 / 25%);
@@ -63,11 +63,11 @@ main {
   --color-fg-default: #2b2b2b; /* --dark */
   --color-fg-muted: #4e4e4e; /* --darkgray */
   --color-fg-subtle: #4e4e4e; /* --darkgray */
-  --color-canvas-default: transparent;
-  --color-canvas-overlay: transparent;
+  --color-canvas-default: #fff;
+  --color-canvas-overlay: #fff;
   --color-canvas-inset: #f6f8fa;
   --color-canvas-subtle: #f6f8fa;
-  --color-border-default: #b8b8b8;
+  --color-border-default: #d0d7de;
   --color-border-muted: hsl(210deg 18% 87% / 100%);
   --color-neutral-muted: rgb(175 184 193 / 20%);
   --color-accent-fg: #0969da;
