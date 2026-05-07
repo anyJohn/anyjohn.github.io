@@ -1,6 +1,6 @@
 #!/bin/bash
-
 echo "🚀 开始发布流程..."
+cd ~/项目/anyjohn.github.io
 
 rsync -av --exclude='.git' ~/文档/Obsidian\ Vault/blog/published/ content/
 
