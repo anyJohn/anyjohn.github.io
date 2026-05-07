@@ -1,0 +1,1 @@
+rsync -av --exclude='.git' ~/文档/Obsidian\ Vault/blog/published/ content/ && npx quartz sync
