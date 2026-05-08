@@ -2,8 +2,7 @@
 title: Cookie和Session
 author: AnyJohn
 tags:
-  - 前端学习笔记
-categories: []
+  - 前端
 date: 2019-11-12 16:20:00
 ---
 ## 浏览器Cookie

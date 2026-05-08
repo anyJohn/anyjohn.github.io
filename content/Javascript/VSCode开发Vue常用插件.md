@@ -2,9 +2,7 @@
 title: VSCode开发Vue常用插件
 author: AnyJohn
 tags:
-  - tools
-categories:
-  - tools
+  - 工具
 date: 2020-08-27 16:49:00
 ---
 ## VSCode 开发Vue 常用插件（基于个人喜好）
@@ -21,9 +19,7 @@ date: 2020-08-27 16:49:00
 ```
 "vetur.format.options.tabSize": 4,
 "vetur.format.options.useTabs": true,
-```
-VSCode的文件还需要点击右下角的这个按钮来设置文件的缩进，更改完之后alt+shift+F就会自动缩进四个空格了
-![6f80fba1d83bac965e2e49f16d1fa8c5.png](en-resource://database/621:1)
+
 3. **Auto Close Tag** :自动闭合HTML/XML标签。不用再输入闭合标签了，舒爽的coding吧！
 4. **Auto Rename Tag** ：自动完成另一侧标签的同步修改。
 5. **HTML CSS Support** : 写样式表自动补全
@@ -39,7 +35,6 @@ VSCode的文件还需要点击右下角的这个按钮来设置文件的缩进�
 ### 最后附上我自己的配置文件，嫌配置麻烦的同学可以复制使用，这里我删掉了ESlint的设置
 
 **打开配置文件的方式**：左上角“文件”->“首选项”->“设置”之后点击右上角的文件图标 
-
 
 ```
 {   "editor.tabSize": 4,//tab = 四个空格

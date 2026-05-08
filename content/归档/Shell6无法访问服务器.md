@@ -1,9 +1,8 @@
 ---
 title: XShell6无法访问服务器
 author: AnyJohn
-tags: []
-categories:
-  - server
+tags:
+  - 归档
 date: 2019-09-25 15:37:00
 ---
 在玩SSH时，听了舍友大佬的话，将SHH协议所在的文件夹权限修改为775后出现Xshell无法连接的问题。

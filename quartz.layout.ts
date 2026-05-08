@@ -56,7 +56,9 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer({
+      title: "探索",
+    }),
   ],
   right: [
     Component.Graph(),

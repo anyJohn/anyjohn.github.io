@@ -2,9 +2,7 @@
 title: 啥是个Token？
 author: AnyJohn
 tags:
-  - 学习笔记
-categories:
-  - 学习笔记
+  - 计算机网络
 date: 2020-08-27 16:51:00
 ---
 ### Token是什么？

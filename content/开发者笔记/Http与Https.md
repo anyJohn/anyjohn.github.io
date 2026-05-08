@@ -2,11 +2,7 @@
 title: Http与Https
 author: AnyJohn
 tags:
-  - 学习笔记
   - 计算机网络
-categories:
-  - 学习笔记
-  - 网络
 date: 2019-10-14 15:40:00
 ---
 ## Http与Https

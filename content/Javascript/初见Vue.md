@@ -3,12 +3,7 @@ title: 初见Vue
 date: 2019-10-17 15:51:00
 author: AnyJohn
 tags:
-  - 学习笔记
-  - Vue
-categories:
-  - 学习笔记
   - 前端
-  - Vue
 ---
 
 # vue2.X 核心技术-最流行的前端框架

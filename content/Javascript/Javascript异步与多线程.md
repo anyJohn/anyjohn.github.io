@@ -1,8 +1,8 @@
+---
 title: Javascript异步与多线程
 author: AnyJohn
 tags:
-  - 前端学习笔记
-categories: []
+  - 前端
 date: 2019-10-20 15:50:00
 ---
 ## 为什么要使用JavaScript多线程编程？

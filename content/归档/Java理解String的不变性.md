@@ -2,11 +2,7 @@
 title: Java理解String的不变性
 author: AnyJohn
 tags:
-  - Java
-  - 学习笔记
-categories:
-  - 学习笔记
-  - Java
+  - 后端
 date: 2019-11-14 16:17:00
 ---
 #### String对象创建后不能被修改,是不可变的,所谓的修改其实是创建了新的对象,所指向的内存空间不同

@@ -3,10 +3,7 @@ title: Steamdeck：如何使用Steamdeck开发
 date: 2025-04-18 09:18:00
 author: AnyJohn
 tags:
-  - Steamdeck
-  - SteamOS
-categories:
-  - SteamDeck
+  - 游戏人生
 ---
 
 ## 前言
@@ -62,5 +59,3 @@ distrobox stop test
 1. VSCode 安装 [Dev Container](https://marketplace.visualstudio.com/items/?itemName=ms-vscode-remote.remote-containers)插件
 2. 点击VSCode的左下角，选择`附加到正在运行的容器`，选择你刚才创建的容器。
 3. 等待服务器初始化完成，就可以调出终端，使用`pacman`、`apt`等包管理器安装nodejs等运行环境，开始非常舒服的开发了。
-
-#Steamdeck #SteamOS 

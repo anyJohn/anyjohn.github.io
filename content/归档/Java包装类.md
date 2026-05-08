@@ -1,10 +1,8 @@
+---
 title: Java包装类
 author: AnyJohn
 tags:
-  - Java
-  - 学习笔记
-categories:
-  - 学习笔记
+  - 后端
 date: 2020-01-15 16:37:00
 ---
 ## 什么是包装类?

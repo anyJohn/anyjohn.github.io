@@ -2,11 +2,6 @@
 title: ES6的学习（一）
 author: AnyJohn
 tags:
-  - 前端学习笔记
-  - ES6
-  - Javascript
-categories:
-  - 学习笔记
   - 前端
 date: 2020-08-13 16:41:00
 ---
