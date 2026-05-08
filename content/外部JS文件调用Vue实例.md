@@ -1,3 +1,4 @@
+---
 title: 外部JS文件调用Vue实例
 author: AnyJohn
 tags:

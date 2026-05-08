@@ -1,3 +1,4 @@
+---
 title: ES6的学习（二）
 author: AnyJohn
 tags:
