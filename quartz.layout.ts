@@ -64,6 +64,12 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Graph(),
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
+    // 在右侧或首页底部加入最近更新
+    Component.DesktopOnly(Component.RecentNotes({ 
+      title: "近期发布", 
+      limit: 5,
+      filter: (f) => f.slug !== "index" // 排除首页自己
+    })),
   ],
 }
 
