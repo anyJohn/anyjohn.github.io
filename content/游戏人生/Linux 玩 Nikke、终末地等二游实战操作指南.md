@@ -1,5 +1,5 @@
 ---
-title: Linux 玩 Nikke 实战操作指南
+title: Linux 玩 Nikke、终末地等二游实战操作指南
 date: 2026-05-11 20:01
 author: AnyJohn
 tags:
