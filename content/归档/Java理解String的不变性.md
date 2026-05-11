@@ -5,9 +5,10 @@ tags:
   - 后端
 date: 2019-11-14 16:17:00
 ---
-#### String对象创建后不能被修改,是不可变的,所谓的修改其实是创建了新的对象,所指向的内存空间不同
 
-```
+# String对象创建后不能被修改,是不可变的,所谓的修改其实是创建了新的对象,所指向的内存空间不同
+
+```javascript
 //比如创建四个String对象,值都为"Love"
 String s1 = "Love";
 String s2 = "Love";
@@ -24,8 +25,9 @@ s1 = s1+" you";
 System.out.println(s1);
 ```
 
-#### 结合try - finally理解
-```
+# 结合try - finally理解
+
+```javascript
 public static int test1() { 
     int i; 
     try {
