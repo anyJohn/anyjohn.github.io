@@ -8,6 +8,8 @@ tags:
 
 # Count Elements Greater Than Previous Average
 
+Origin: [Count Elements Greater Than Previous Average](https://www.hackerrank.com/contests/software-engineer-prep-kit/challenges/count-elements-greater-than-previous-average/problem)
+
 ## Problem
 
 Given an array of positive integers, return the number of elements that are strictly greater than the average of all previous elements. Skip the first element.

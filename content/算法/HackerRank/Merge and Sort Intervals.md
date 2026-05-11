@@ -8,6 +8,8 @@ tags:
 
 # Merge and Sort Intervals
 
+Origin: [Merge and Sort Intervals](https://www.hackerrank.com/contests/software-engineer-prep-kit/challenges/merge-and-sort-intervals/problem)
+
 ## Problem
 
 Given an array of intervals [startTime, endTime], merge all overlapping intervals and return a sorted array of non-overlapping intervals.

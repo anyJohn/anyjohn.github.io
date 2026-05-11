@@ -8,6 +8,8 @@ tags:
 
 # Subarrays with Given Sum and Bounded Maximum
 
+Origin: [Subarrays with Given Sum and Bounded Maximum](https://www.hackerrank.com/contests/software-engineer-prep-kit/challenges/subarrays-given-sum-bounded-maximum/problem)
+
 ## Problem
 
 Given an integer array _nums_ and integers _k_ and _M_, count the number of contiguous subarrays whose sum equals _k_ and whose maximum element is at most _M_.
