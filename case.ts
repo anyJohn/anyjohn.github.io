@@ -1,16 +1,24 @@
-function countResponseTimeRegressions(responseTimes: number[]): number {
+function countSubarraysWithSumAndMaxAtMost(nums: number[], k: number, M: number): number {
   // Write your code here
-  let count = 0
-  let average = responseTimes[0]
+  if (!nums.length) {
+    return 0
+  }
 
-  for (let i = 1; i < responseTimes.length; i++) {
-    average = (average * i + responseTimes[i]) / (i + 1)
-    if (responseTimes[i] > average) {
-      count++
+  let res = 0
+
+  for (let i = 0; i < nums.length; i++) {
+    let sum = 0
+    let max = -Infinity
+    for (let j = i; j < nums.length; j++) {
+      sum += nums[j]
+      max = Math.max(nums[j], max)
+      if (sum === k && max <= M) {
+        res++
+      }
     }
   }
-  return count
+
+  return res
 }
 
-const res = countResponseTimeRegressions([100, 200, 150, 300]) // Output: 2
-console.log(res)
+console.log(countSubarraysWithSumAndMaxAtMost([2, -1, 2, 1, -2, 3], 3, 2))
