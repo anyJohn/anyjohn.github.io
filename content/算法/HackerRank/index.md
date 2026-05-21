@@ -9,8 +9,11 @@ tags:
 
 SoftwareEngineerPrepKit
 
-Arrays And Basic Problem Solving
+## Arrays And Basic Problem Solving
 
 - [[Count Elements Greater Than Previous Average]]
 - [[Merge and Sort Intervals]]
 - [[Subarrays with Given Sum and Bounded Maximum]]
+
+## Strings and Pattern Matching
+- [[Check Palindrome by Filtering Non-Letters]]
