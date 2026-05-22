@@ -106,9 +106,7 @@ Also, any subarray containing 3 is invalid because 3 > M. Check all starts:
 ```typescript
 function countSubarraysWithSumAndMaxAtMost(nums: number[], k: number, M: number): number {
   // Write your code here
-  if (!nums.length) {
-    return 0
-  }
+  if (!nums.leng  }
 
   let res = 0
 
