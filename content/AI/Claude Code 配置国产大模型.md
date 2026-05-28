@@ -109,7 +109,8 @@ claude --version
 Linux / Mac 用户，直接在终端中执行：
 
 ```bash
-export ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropicexport ANTHROPIC_AUTH_TOKEN=<你的 DeepSeek API Key>
+export ANTHROPIC_BASE_URL=https://api.deepseek.com/anthropicexport 
+export ANTHROPIC_AUTH_TOKEN=<你的 DeepSeek API Key>
 export ANTHROPIC_MODEL=deepseek-v4-pro[1m]
 export ANTHROPIC_DEFAULT_OPUS_MODEL=deepseek-v4-pro[1m]
 export ANTHROPIC_DEFAULT_SONNET_MODEL=deepseek-v4-pro[1m]

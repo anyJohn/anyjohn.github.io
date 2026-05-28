@@ -214,3 +214,19 @@ while 继续： 1 ↔ nums[0]=-1 → [1, -1, 3, 4] ✓
 
 - **时间复杂度**：O(n) — 每个数最多被交换一次到正确位置，内层 while 的总执行次数不超过 n 次
 - **空间复杂度**：O(1) — 原地交换，无额外数据结构
+
+### 其他解法
+
+如果允许 O(n) 的空间复杂度，那么我们可以用 set/map 的方式去解，将数组存放到 set 中，假设缺少的最小正整数是1，然后循环增加 1，直到 set 即数组中没有该元素。
+
+```javascript
+function setFindSmallestMissingPositive(orderNumbers: number[]): number {
+    // Write your code here
+    const set = new Set(orderNumbers);
+    let missing = 1;
+    while (set.has(missing)) {
+        missing++;
+    }
+    return missing;
+}
+```
