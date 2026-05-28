@@ -1,0 +1,110 @@
+---
+title: Check for Non-Identical String Rotation
+date: 2026-05-26 19:57
+author: AnyJohn
+tags:
+  - 算法
+---
+
+# Check for Non-Identical String Rotation
+
+Origin: [Check for Non-Identical String Rotation](https://www.hackerrank.com/contests/software-engineer-prep-kit/challenges/check-non-identical-string-rotation/problem?isFullScreen=true)
+
+Given two strings s1 and s2, return 1 if s2 is a rotation of s1 but not identical to s1, otherwise return 0.
+
+**Example**
+
+Input:
+
+```javascript
+s1 = abcde
+s2 = cdeab
+```
+
+Output:
+
+```javascript
+True
+```
+
+Explanation:
+
+- s2 ('cdeab') is a non-trivial rotation of s1 ('abcde').
+- If you rotate 'abcde' left by 2 positions, you get 'cdeab'.
+- Since s2 is not equal to s1 and is a rotation, the output is true.
+
+**Input Format**
+
+- The first line contains the string s1, followed by s2 on the next line.
+
+**Constraints**
+
+- 1 <= |s1| <= 1000
+- 1 <= |s2| <= 1000
+- |s1| = |s2|
+- s1 & s2 both consists of lowercase English letters ('a'-'z') only
+
+**Output Format**
+
+- The function returns a single BOOLEAN value, 1 for True and 0 for False
+
+**Sample Input 0**
+
+```javascript
+a
+a
+```
+
+**Sample Output 0**
+
+```javascript
+0
+```
+
+**Sample Input 1**
+
+```javascript
+a
+b
+```
+
+**Sample Output 1**
+
+```javascript
+0
+```
+
+## Resolution
+
+O(n²) 的时间复杂度
+
+```javascript
+function isNonTrivialRotation(s1: string, s2: string): boolean {
+	// Write your code here
+    if (s1 === s2) {
+        return false;
+    }
+    for (let i = 0; i < s1.length; i++) {
+        const pre = s1.slice(0, i);
+        const rest = s1.slice(i, s1.length);
+        if (rest + pre === s2) {
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+## 更多解法
+
+核心洞察：把所有旋转可能性编码到 s1 + s1 里，然后问题就退化成子串匹配。
+
+循环对比的本质上是在手动枚举所有旋转，而 s1 + s1 就是那个"所有旋转的集合"。两种写法表达的是同一个东西，只是后者利用了字符串操作的内部优化（includes 通常用高效的子串匹配算法实现）。
+
+时间复杂度降低为 O(n)
+
+```javascript  
+function isNonTrivialRotation(s1: string, s2: string): boolean {
+    return s1 !== s2 && s1.length === s2.length && (s1 + s1).includes(s2);
+}
+```
