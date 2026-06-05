@@ -49,6 +49,8 @@ sshpass -e ssh -o StrictHostKeyChecking=no user@remote_ip 'sh /path/to/script.sh
 
 这是最稳健的做法。通过交换公钥，让服务器彻底信任你的本地设备。
 
+[[Linux 本地生成公钥访问远程服务器]]
+
 **核心命令：**
 
 ```bash
