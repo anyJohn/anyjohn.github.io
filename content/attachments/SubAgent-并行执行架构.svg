@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" font-family="system-ui, -apple-system, sans-serif">
+  <rect width="1000" height="520" fill="#ffffff"/>
+
+  <text x="500" y="35" text-anchor="middle" font-size="22" font-weight="bold" fill="#1e1e1e">Main Agent（主进程）</text>
+
+  <rect x="30" y="55" width="940" height="80" rx="6" fill="#a5d8ff" stroke="#1971c2" stroke-width="2"/>
+
+  <text x="500" y="80" text-anchor="middle" font-size="15" fill="#1971c2" font-weight="bold">Tools: bash  |  read  |  write  |  edit  |  plan  |  subagent</text>
+
+  <text x="500" y="110" text-anchor="middle" font-size="13" fill="#495057">Messages（完整对话历史）  |  Memory（长期记忆）  |  Rules &amp; Skills</text>
+
+  <text x="260" y="160" text-anchor="middle" font-size="12" fill="#e03131" font-weight="bold">spawn()</text>
+  <text x="500" y="160" text-anchor="middle" font-size="12" fill="#e03131" font-weight="bold">spawn()</text>
+  <text x="740" y="160" text-anchor="middle" font-size="12" fill="#e03131" font-weight="bold">spawn()</text>
+
+  <line x1="260" y1="140" x2="260" y2="210" stroke="#1971c2" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <line x1="500" y1="140" x2="500" y2="210" stroke="#1971c2" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <line x1="740" y1="140" x2="740" y2="210" stroke="#1971c2" stroke-width="2" marker-end="url(#arrowBlue)"/>
+
+  <!-- SubAgent A -->
+  <rect x="70" y="220" width="300" height="115" rx="6" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+  <text x="220" y="245" text-anchor="middle" font-size="18" font-weight="bold" fill="#2f9e44">SubAgent A</text>
+  <text x="220" y="270" text-anchor="middle" font-size="13" fill="#495057">Tools: bash  |  read  |  write  |  edit</text>
+  <rect x="90" y="280" width="260" height="22" rx="3" fill="none" stroke="#868e96" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="220" y="296" text-anchor="middle" font-size="11" fill="#868e96">独立 Messages  ·  无 subagent 工具</text>
+  <text x="220" y="316" text-anchor="middle" font-size="11" fill="#495057">task: "检查 /src/api/ 安全问题"</text>
+  <text x="220" y="330" text-anchor="middle" font-size="10" fill="#e03131">内部：串行 Agent Loop（≤10 轮）</text>
+
+  <!-- SubAgent B -->
+  <rect x="350" y="220" width="300" height="115" rx="6" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+  <text x="500" y="245" text-anchor="middle" font-size="18" font-weight="bold" fill="#2f9e44">SubAgent B</text>
+  <text x="500" y="270" text-anchor="middle" font-size="13" fill="#495057">Tools: bash  |  read  |  write  |  edit</text>
+  <rect x="370" y="280" width="260" height="22" rx="3" fill="none" stroke="#868e96" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="500" y="296" text-anchor="middle" font-size="11" fill="#868e96">独立 Messages  ·  无 subagent 工具</text>
+  <text x="500" y="316" text-anchor="middle" font-size="11" fill="#495057">task: "检查 /src/components/ 性能"</text>
+  <text x="500" y="330" text-anchor="middle" font-size="10" fill="#e03131">内部：串行 Agent Loop（≤10 轮）</text>
+
+  <!-- SubAgent C -->
+  <rect x="630" y="220" width="300" height="115" rx="6" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2"/>
+  <text x="780" y="245" text-anchor="middle" font-size="18" font-weight="bold" fill="#2f9e44">SubAgent C</text>
+  <text x="780" y="270" text-anchor="middle" font-size="13" fill="#495057">Tools: bash  |  read  |  write  |  edit</text>
+  <rect x="650" y="280" width="260" height="22" rx="3" fill="none" stroke="#868e96" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="780" y="296" text-anchor="middle" font-size="11" fill="#868e96">独立 Messages  ·  无 subagent 工具</text>
+  <text x="780" y="316" text-anchor="middle" font-size="11" fill="#495057">task: "检查 /src/utils/ 测试覆盖率"</text>
+  <text x="780" y="330" text-anchor="middle" font-size="10" fill="#e03131">内部：串行 Agent Loop（≤10 轮）</text>
+
+  <text x="500" y="370" text-anchor="middle" font-size="14" fill="#e03131" font-weight="bold">Promise.all → 汇总结果 → 返回 main agent</text>
+
+  <line x1="220" y1="340" x2="220" y2="420" stroke="#2f9e44" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+  <line x1="500" y1="340" x2="500" y2="420" stroke="#2f9e44" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+  <line x1="780" y1="340" x2="780" y2="420" stroke="#2f9e44" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <rect x="150" y="435" width="700" height="65" rx="6" fill="#fff3bf" stroke="#f08c00" stroke-width="1"/>
+  <text x="500" y="458" text-anchor="middle" font-size="13" fill="#e8590c" font-weight="bold">三个 SubAgent 之间：并行执行（Promise.all）· 无共享状态</text>
+  <text x="500" y="480" text-anchor="middle" font-size="13" fill="#e8590c">每个 SubAgent 内部：串行 Agent Loop · 最多 10 轮</text>
+
+  <defs>
+    <marker id="arrowBlue" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#1971c2"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#2f9e44"/>
+    </marker>
+  </defs>
+</svg>

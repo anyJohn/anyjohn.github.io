@@ -3,6 +3,8 @@ title: Linux 本地生成公钥访问远程服务器
 date: 2026-06-05 20:17
 author: AnyJohn
 tags:
+  - Linux
+  - 工具
 ---
 
 # Linux 本地生成公钥访问远程服务器
