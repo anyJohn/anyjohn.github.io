@@ -30,14 +30,18 @@ tags:
 
 ## 二、初始日志特征
 
-```javascript
-New client connectedpam_unix(login:auth): authentication failurepassword check failed for user
+```text
+New client connected
+pam_unix(login:auth): authentication failure
+password check failed for user
 ```
 
 随后出现：
 
-```javascript
-PostConnect for peer failedSTATE_RUN_FAILEDBIO_read returned system error 104 (connection reset)
+```text
+PostConnect for peer failed
+STATE_RUN_FAILED
+BIO_read returned system error 104 (connection reset)
 ```
 
 ---
@@ -46,14 +50,16 @@ PostConnect for peer failedSTATE_RUN_FAILEDBIO_read returned system error 104 (c
 
 ### 关键线索
 
-```javascript
-pam_unix(login:auth): authentication failureunix_chkpwd: user unknown
+```text
+pam_unix(login:auth): authentication failure
+unix_chkpwd: user unknown
 ```
 
 以及 systemd 服务属性：
 
-```javascript
-systemctl --user show app-org.kde.krdpserver.service -p NoNewPrivilegesNoNewPrivileges=yes
+```bash
+systemctl --user show app-org.kde.krdpserver.service -p NoNewPrivileges  
+NoNewPrivileges=yes
 ```
 
 ---
@@ -80,8 +86,16 @@ KRDP 通过 PAM 调用系统认证：
 
 创建 systemd override：
 
-```javascript
-mkdir -p ~/.config/systemd/user/app-org.kde.krdpserver.service.dcat > ~/.config/systemd/user/app-org.kde.krdpserver.service.d/override.conf << EOF[Service]NoNewPrivileges=falseEOFsystemctl --user daemon-reloadsystemctl --user restart app-org.kde.krdpserver.service
+```bash
+mkdir -p ~/.config/systemd/user/app-org.kde.krdpserver.service.d
+
+cat > ~/.config/systemd/user/app-org.kde.krdpserver.service.d/override.conf << EOF
+[Service]
+NoNewPrivileges=false
+EOF
+
+systemctl --user daemon-reload
+systemctl --user restart app-org.kde.krdpserver.service
 ```
 
 ---
@@ -90,14 +104,17 @@ mkdir -p ~/.config/systemd/user/app-org.kde.krdpserver.service.dcat > ~/.config/
 
 修复前：
 
-```javascript
-pam_authenticate failureconnection reset immediately
+```text
+pam_authenticate failure
+connection reset immediately
 ```
 
 修复后：
 
-```javascript
-New client connectedVAAPI encoder initializedsession established
+```text
+New client connected  
+VAAPI encoder initialized  
+session established
 ```
 
 说明 PAM 阶段已经恢复正常。
@@ -108,8 +125,10 @@ New client connectedVAAPI encoder initializedsession established
 
 日志中仍存在：
 
-```javascript
-WITH_VAAPI_H264_ENCODING=ON (experimental)QObject thread mismatch warningVAAPI Intel iHD driver in use
+```text
+WITH_VAAPI_H264_ENCODING=ON (experimental)  
+QObject thread mismatch warning  
+VAAPI Intel iHD driver in use
 ```
 
 但：
@@ -126,8 +145,16 @@ WITH_VAAPI_H264_ENCODING=ON (experimental)QObject thread mismatch warningVAAPI I
 
 ### 根因链路
 
-```javascript
-systemd sandbox（NoNewPrivileges=yes）        ↓PAM helper 无法执行        ↓authentication failure        ↓FreeRDP session abort        ↓客户端黑屏后断开
+```text
+systemd sandbox（NoNewPrivileges=yes）  
+↓  
+PAM helper 无法执行  
+↓  
+authentication failure  
+↓  
+FreeRDP session abort  
+↓  
+客户端黑屏后断开
 ```
 
 ---
@@ -136,7 +163,7 @@ systemd sandbox（NoNewPrivileges=yes）        ↓PAM helper 无法执行      
 
 ### 必须修复
 
-```javascript
+```ini
 NoNewPrivileges=false
 ```
 
