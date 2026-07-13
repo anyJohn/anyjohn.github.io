@@ -4,6 +4,8 @@ date: 2026-05-11 17:12
 author: AnyJohn
 tags:
   - 算法
+  - 子数组
+  - 滑动窗口
 ---
 
 # Subarrays with Given Sum and Bounded Maximum
