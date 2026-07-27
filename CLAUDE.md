@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Personal digital garden / blog (AnyJohn's blog) built on **Quartz v5.0.0**, published at `anyjohn.github.io`. Content is written in Chinese (Simplified). Quartz is a static site generator that turns Markdown notes into a website, designed for Obsidian-based digital gardens.
 
 - **Framework**: Quartz v5 (TypeScript, Preact, SCSS, esbuild)
-- **Node**: v22 (enforced via `.node-version` and `engine-strict=true` in `.npmrc`)
+- **Node**: v22 (`.node-version` pins `v22.16.0`; `.npmrc` sets `engine-strict=true`, and `package.json` requires `node >=22`, `npm >=10.9.2`)
 - **Package manager**: npm (`npm ci` in CI)
 - **Deployment**: GitHub Actions builds and deploys to GitHub Pages on push to `v5`
 
@@ -36,7 +36,20 @@ npx quartz plugin add github:quartz-community/<plugin-name>
 npx quartz tui
 
 # Sync content from local Obsidian vault, commit, and push
+# (publish.sh is a local script kept outside version control — see "Content publishing workflow" below)
 bash publish.sh
+
+# Run all tests (tsx --test runner)
+npm test
+
+# Run a single test file
+npx tsx --test quartz/util/path.test.ts
+
+# Build & serve Quartz's own docs site (-d docs)
+npm run docs
+
+# Profile a build with 0x (--concurrency=1)
+npm run profile
 ```
 
 ## Architecture
@@ -91,7 +104,7 @@ Plugin ordering matters: `order` field controls execution order (lower runs firs
 ## Content publishing workflow
 
 1. Content is authored in Obsidian at `~/文档/Obsidian Vault/blog/published/`
-2. `publish.sh` syncs content: `rsync` from the Obsidian vault → `content/`, then `git add .`, commits, and pushes to `origin v5`
+2. `publish.sh` (a local script kept **outside** this repo) syncs content: `rsync` from the Obsidian vault → `content/`, then `git add .`, commits with the `update:` message, and pushes to `origin v5`
 3. GitHub Actions (`.github/workflows/deploy.yml`) triggers on push to `v5`, runs `npx quartz plugin install` then `npx quartz build`, deploys `public/` to GitHub Pages
 
 ## Commit conventions

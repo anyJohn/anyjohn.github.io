@@ -357,6 +357,35 @@ function linkPeerDependencies(pluginDir: string): void {
   }
 }
 
+/**
+ * Remove a single scoped package entry from a plugin's committed
+ * `package-lock.json` so that `npm install` re-resolves just that package
+ * from the registry (picking up the latest version matching its declared
+ * range) while leaving every other pinned dependency untouched. No-op when
+ * the package isn't locked or there is no lockfile.
+ */
+function unpinScopedDependency(pluginDir: string, scopedName: string): void {
+  const lockPath = path.join(pluginDir, "package-lock.json")
+  if (!fs.existsSync(lockPath)) return
+
+  let lock: Record<string, unknown>
+  try {
+    lock = JSON.parse(fs.readFileSync(lockPath, "utf-8"))
+  } catch {
+    return // Corrupt or unreadable lockfile — leave it for npm to handle.
+  }
+
+  const packages = lock.packages
+  if (!packages || typeof packages !== "object") return
+
+  const pkgMap = packages as Record<string, unknown>
+  const key = `node_modules/${scopedName}`
+  if (!(key in pkgMap)) return
+
+  delete pkgMap[key]
+  fs.writeFileSync(lockPath, JSON.stringify(lock, null, 2))
+}
+
 function buildInstalledPlugin(pluginDir: string, name: string, verbose?: boolean): void {
   if (hasPrebuiltDist(pluginDir)) {
     if (verbose) {
@@ -368,6 +397,16 @@ function buildInstalledPlugin(pluginDir: string, name: string, verbose?: boolean
 
   try {
     const shouldBuild = needsBuild(pluginDir)
+
+    // `@quartz-community/utils` < 0.1.1 ships a `getFullSlugFromUrl` that reads
+    // `window.location.pathname` without `decodeURI`, so non-ASCII (e.g. CJK)
+    // slugs arrive percent-encoded and never match the (decoded) keys in
+    // contentIndex.json — the graph view then renders only the current node.
+    // Plugin lockfiles shipped upstream pin `@quartz-community/utils` to 0.1.0,
+    // so `npm install` keeps the buggy version. Drop just that lock entry so
+    // npm re-resolves it fresh (→ 0.1.1+) without disturbing the rest of the
+    // pinned dependency tree.
+    unpinScopedDependency(pluginDir, "@quartz-community/utils")
 
     if (verbose) {
       console.log(styleText("cyan", `→`), `${name}: installing dependencies...`)
