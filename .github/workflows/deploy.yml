@@ -28,14 +28,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .quartz/plugins
-          # Hashing the plugin loader too (and bumping the v2 prefix) makes a
+          # Hashing the plugin loader too (and bumping the v3 prefix) makes a
           # change to the build pipeline — e.g. the unpin-@quartz-community/utils
           # fix in gitLoader.ts — invalidate the cached, pre-built plugin bundles.
-          # Without this, `npx quartz plugin install` would reuse the stale
-          # cached dist/ and never pick up the fix.
-          key: ${{ runner.os }}-plugins-v2-${{ hashFiles('quartz.lock.json', 'quartz/plugins/loader/**') }}
+          # Without this (and the matching v3 restore-keys), `npx quartz plugin
+          # install` would reuse the stale cached dist/ — including the pre-built
+          # graph bundle that ships utils 0.1.0 — and never pick up the fix.
+          key: ${{ runner.os }}-plugins-v3-${{ hashFiles('quartz.lock.json', 'quartz/plugins/loader/**') }}
           restore-keys: |
-            ${{ runner.os }}-plugins-v2-
+            ${{ runner.os }}-plugins-v3-
       - name: Install Dependencies
         run: npm ci
       - name: Install Quartz plugins
