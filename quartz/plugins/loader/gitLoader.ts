@@ -357,6 +357,45 @@ function linkPeerDependencies(pluginDir: string): void {
   }
 }
 
+/**
+ * Deterministically fix the `getFullSlugFromUrl` bug in a plugin's built dist
+ * without depending on npm resolving `@quartz-community/utils` to >= 0.1.1.
+ * Walks every .js file under dist/ and, where utils 0.1.0's getFullSlugFromUrl
+ * left the pathname undecoded (`let X=window.location.pathname;return X.endsWith`),
+ * wraps the read in `decodeURI(...)`. Idempotent: a no-op once utils >= 0.1.1
+ * (which already calls `decodeURI`) is bundled, since the pattern won't match.
+ */
+function patchGetFullSlugDecodeURI(pluginDir: string): void {
+  const distDir = path.join(pluginDir, "dist")
+  if (!fs.existsSync(distDir)) return
+
+  const walk = (dir: string): string[] => {
+    const out: string[] = []
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name)
+      if (entry.isDirectory()) out.push(...walk(p))
+      else if (entry.name.endsWith(".js")) out.push(p)
+    }
+    return out
+  }
+
+  // Matches utils 0.1.0's `let X=window.location.pathname;return X.endsWith`
+  // (the getFullSlugFromUrl body). utils 0.1.1 writes
+  // `let X=decodeURI(window.location.pathname);…`, which this does NOT match.
+  const hasBug = /let \w=window\.location\.pathname;return \w\.endsWith/
+  const fix = /let (\w)=window\.location\.pathname;return \1\.endsWith/g
+
+  for (const file of walk(distDir)) {
+    const src = fs.readFileSync(file, "utf-8")
+    if (!hasBug.test(src)) continue
+    fs.writeFileSync(
+      file,
+      src.replace(fix, "let $1=decodeURI(window.location.pathname);return $1.endsWith"),
+    )
+    console.log(styleText("green", `✓`), `patched decodeURI in ${path.relative(pluginDir, file)}`)
+  }
+}
+
 function buildInstalledPlugin(pluginDir: string, name: string, verbose?: boolean): void {
   if (hasPrebuiltDist(pluginDir)) {
     if (verbose) {
@@ -378,22 +417,6 @@ function buildInstalledPlugin(pluginDir: string, name: string, verbose?: boolean
       timeout: 120_000,
     })
 
-    // `@quartz-community/utils` < 0.1.1 ships a `getFullSlugFromUrl` that reads
-    // `window.location.pathname` without `decodeURI`, so non-ASCII (e.g. CJK)
-    // slugs arrive percent-encoded and never match the (decoded) keys in
-    // contentIndex.json — the graph view then renders only the current node.
-    // Plugin lockfiles shipped upstream pin `@quartz-community/utils` to 0.1.0,
-    // and `npm install` honours that lock, keeping the buggy version bundled
-    // into the graph plugin's dist. Force the fixed version into the plugin's
-    // node_modules (no-save, so the plugin's own lockfile is untouched) so the
-    // subsequent `npm run build` bundles `decodeURI`. No-op for plugins that
-    // don't depend on it. Bump the pin when a newer fix is released.
-    execSync("npm install --ignore-scripts --no-save @quartz-community/utils@0.1.1", {
-      cwd: pluginDir,
-      stdio: verbose ? "inherit" : "pipe",
-      timeout: 120_000,
-    })
-
     if (shouldBuild) {
       if (verbose) {
         console.log(styleText("cyan", `→`), `${name}: building...`)
@@ -403,6 +426,17 @@ function buildInstalledPlugin(pluginDir: string, name: string, verbose?: boolean
         stdio: verbose ? "inherit" : "pipe",
         timeout: 120_000,
       })
+
+      // `@quartz-community/utils` < 0.1.1 ships a `getFullSlugFromUrl` that reads
+      // `window.location.pathname` without `decodeURI`, so non-ASCII (e.g. CJK)
+      // slugs arrive percent-encoded and never match the (decoded) keys in
+      // contentIndex.json — the graph view then renders only the current node.
+      // Plugin lockfiles ship pinned to 0.1.0 and `npm install` honours that,
+      // so the bundled getFullSlugFromUrl keeps the bug. Rather than fight npm
+      // resolution/hoisting across node versions, deterministically patch the
+      // built dist: wrap the pathname read in `decodeURI`. Idempotent — no-op
+      // when utils ≥ 0.1.1 is already bundled (the pattern won't match).
+      patchGetFullSlugDecodeURI(pluginDir)
     }
 
     execSync("npm prune --omit=dev", {
