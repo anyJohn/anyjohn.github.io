@@ -46,6 +46,40 @@ async function cloneWithSubdirAsync({ url, ref, subdir, pluginDir }) {
   }
 }
 
+/**
+ * Deterministically fix the getFullSlugFromUrl decode bug in a plugin's
+ * built dist without depending on npm resolving @quartz-community/utils to
+ * >= 0.1.1. Walks every .js under dist/ and, where utils 0.1.0's
+ * getFullSlugFromUrl left the pathname undecoded
+ * (`let X=window.location.pathname;return X.endsWith`), wraps the read in
+ * decodeURI(...). Idempotent: a no-op once utils >= 0.1.1 (which already
+ * calls decodeURI) is bundled, since the pattern will not match.
+ */
+function patchGetFullSlugDecodeURI(pluginDir) {
+  const distDir = path.join(pluginDir, "dist")
+  if (!fs.existsSync(distDir)) return
+  const walk = (dir) => {
+    const out = []
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, entry.name)
+      if (entry.isDirectory()) out.push(...walk(p))
+      else if (entry.name.endsWith(".js")) out.push(p)
+    }
+    return out
+  }
+  const hasBug = /let \w=window\.location\.pathname;return \w\.endsWith/
+  const fix = /let (\w)=window\.location\.pathname;return \1\.endsWith/g
+  for (const file of walk(distDir)) {
+    const src = fs.readFileSync(file, "utf-8")
+    if (!hasBug.test(src)) continue
+    fs.writeFileSync(
+      file,
+      src.replace(fix, "let $1=decodeURI(window.location.pathname);return $1.endsWith"),
+    )
+    console.log(styleText("green", `  ✓ patched decodeURI in ${path.relative(pluginDir, file)}`))
+  }
+}
+
 async function buildPluginAsync(pluginDir, name) {
   if (hasPrebuiltDist(pluginDir)) {
     console.log(styleText("green", `  ✓ ${name}: using pre-built dist/`))
@@ -60,6 +94,15 @@ async function buildPluginAsync(pluginDir, name) {
     if (!skipBuild) {
       console.log(styleText("cyan", `  → ${name}: building...`))
       await execAsync("npm run build", { cwd: pluginDir })
+      // @quartz-community/utils < 0.1.1 ships getFullSlugFromUrl reading
+      // window.location.pathname WITHOUT decodeURI, so non-ASCII (CJK) slugs
+      // arrive percent-encoded and never match the decoded contentIndex.json
+      // keys — the graph view renders only the current node. Plugin lockfiles
+      // pin utils to 0.1.0 and `npm install` honours that, so the bundled
+      // getFullSlugFromUrl keeps the bug. Deterministically patch the built
+      // dist: wrap the pathname read in decodeURI. Idempotent no-op once
+      // utils >= 0.1.1 (already calls decodeURI) is bundled.
+      patchGetFullSlugDecodeURI(pluginDir)
     }
     await execAsync("npm prune --omit=dev", { cwd: pluginDir })
     linkPeerPlugins(pluginDir)

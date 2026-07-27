@@ -28,16 +28,16 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .quartz/plugins
-          # The cache stores pre-built plugin dist/, and `npx quartz plugin install`
-          # skips rebuilding whenever the plugin directory already exists. So the
-          # key must change whenever the build pipeline or any pinned plugin
-          # version changes — otherwise a stale dist/ (e.g. the graph bundle with
-          # the buggy utils 0.1.0 getFullSlugFromUrl) gets reused as-is.
-          # Hashing the plugin loader makes loader changes (like the
-          # force-@quartz-community/utils@0.1.1 install in gitLoader.ts) bust
-          # the cache. No restore-keys: a partial fallback would restore an old
-          # dist/ that the install step would then skip-reuse, defeating the fix.
-          key: ${{ runner.os }}-plugins-v4-${{ hashFiles('quartz.lock.json', 'quartz/plugins/loader/**') }}
+          # The cache stores pre-built plugin dist/, and `npx quartz plugin
+          # install` skips rebuilding whenever the plugin directory already
+          # exists. So the key must change whenever the build pipeline or any
+          # pinned plugin version changes — otherwise a stale dist/ (e.g. the
+          # graph bundle with utils 0.1.0's buggy getFullSlugFromUrl) gets
+          # reused as-is. Hashing the CLI and plugin loader makes pipeline
+          # changes (like the decodeURI patch in plugin-git-handlers.js) bust
+          # the cache. No restore-keys: a partial fallback would restore an
+          # old dist/ the install step would then skip-reuse, defeating the fix.
+          key: ${{ runner.os }}-plugins-v5-${{ hashFiles('quartz.lock.json', 'quartz/cli/**', 'quartz/plugins/loader/**') }}
       - name: Install Dependencies
         run: npm ci
       - name: Install Quartz plugins
