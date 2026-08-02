@@ -47,7 +47,7 @@ sshpass -e ssh -o StrictHostKeyChecking=no user@remote_ip 'sh /path/to/script.sh
 
 ### 方案 B：建立“身份契约”（SSH Key 认证 - 推荐）
 
-这是最稳健的做法。通过交换公钥，让服务器彻底信任你的本地设备。
+这是最稳健的做法。通过交换公钥，让服务器彻底信任你的本地设                                                                                                                                                                                                                                  备。
 
 [[Linux 本地生成公钥访问远程服务器]]
 
@@ -64,7 +64,51 @@ ssh-copy-id user@remote_ip
 3. **写入**：将公钥追加到远程服务器的 `authorized_keys` 文件中。
 4. **赋权**：自动修复远程目录权限（700/600），确保 SSH 安全策略允许免密登录。
 
-## 3. 实战：在 Obsidian 中一键发布
+## 3. Windows 篇：SSH Key 认证配置
+
+Windows 没有 `ssh-copy-id`，需要手动操作。
+
+### 生成密钥
+
+打开 PowerShell：
+
+```powershell
+ssh-keygen -t ed25519
+```
+
+一路回车，密钥生成在 `C:\Users\你的用户名\.ssh\` 目录下。
+
+### 把公钥传到服务器
+
+```powershell
+type C:\Users\你的用户名\.ssh\id_ed25519.pub | ssh user@remote_ip "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+```
+
+一行做了三件事：读公钥内容 → 通过 SSH 追加到服务器的 authorized_keys → 修权限。
+
+### 测试免密登录
+
+```powershell
+ssh user@remote_ip
+```
+
+不再要求输密码就成功了。
+
+### 排错
+
+如果还是要求密码，检查服务器端权限：
+
+- `~/.ssh` 目录权限 700
+- `~/.ssh/authorized_keys` 文件权限 600
+
+SSH 对权限非常严格，权限不对会静默拒绝。可以用以下命令在服务器上修复：
+
+```bash
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/authorized_keys
+```
+
+## 4. 实战：在 Obsidian 中一键发布
 
 如果你在 Obsidian 中配置自动发布脚本，建议采用 **方案 B**。配置完成后，你的脚本将变得极其简洁：
 
@@ -75,7 +119,7 @@ ssh-copy-id user@remote_ip
 ssh admin@x.x.x.x '~/publish.sh'
 ```
 
-## 4. 深度思考：为什么 SSH 不内置自动输入密码？
+## 5. 深度思考：为什么 SSH 不内置自动输入密码？
 
 作为开发者，理解工具的设计哲学非常重要。SSH 官方拒绝内置 `ssh -p password` 功能，主要是为了：
 
