@@ -1534,6 +1534,177 @@ Verification
 
 ---
 
+# 31. RDD 在已有系统上的特性开发
+
+RDD 不仅适用于从零开始的新项目。实际工作中大部分需求是在已有系统上加特性——系统已经有代码、有架构、有历史决策。RDD 通过反向追踪和 Impact Analysis 解决这个问题。
+
+## 31.1 先反向追踪，理解现状
+
+新特性不是凭空开始的。先用 Traceability 链找到现有系统对应的需求和 Spec：
+
+```text
+新需求 RR-002："给 Agent 增加 Workspace"
+      ↓
+Impact Analysis：扫描现有系统
+      ↓
+发现已有相关代码：src/agent.ts、src/task.ts
+      ↓
+反向追踪：code → spec → story → feature
+      ↓
+结果 A：找到对应 Spec → 基于现有 Spec 扩展
+结果 B：没有对应 Spec（历史代码没走 RDD） → 进入 Spec Reconstruction
+```
+
+## 31.2 Spec Reconstruction（规格重建）
+
+如果现有代码没有 Spec，先从代码反向推导出 Spec：
+
+```text
+现有代码
+  ↓ 推导
+Behavior（status=inferred）
+  ↓ 推导
+Constraint（status=inferred）
+  ↓ 推导
+Invariant（status=inferred）
+  ↓ 等 Human 确认
+Behavior（status=confirmed）
+```
+
+这不完美，但比没有 Spec 好。标注 `inferred` 的 Spec 后续可以被验证或推翻。Human 确认后升级为 `confirmed`。
+
+## 31.3 Impact Analysis（影响分析）
+
+新特性的 Spec 不能凭空写，要分析对现有系统的影响：
+
+```text
+新 Spec SPEC-002
+  ↓
+依赖分析：需要修改哪些现有模块？
+  ↓
+约束分析：新特性是否违反现有 Invariant？
+  ↓
+兼容性分析：是否破坏现有行为？
+  ↓
+产出：Impact Report
+  - affects: [src/agent.ts, src/task.ts]
+  - risk: medium
+  - constraints_to_check: [I-001, I-002]
+  - backward_compatible: true
+```
+
+Impact Report 是 Decision 的一种，需要 Human 确认后才进入 Spec 编写。
+
+## 31.4 新旧 Spec 的关系
+
+新特性的 Spec 和现有 Spec 之间会产生关系：
+
+```text
+SPEC-001 (现有，inferred 或 confirmed)
+  ↓ modifies
+SPEC-002 (新特性)
+  ↓ depends_on
+SPEC-003 (被依赖的现有 Spec)
+```
+
+Work Item Graph 的关系类型支持：
+
+```text
+modifies       — 新 Spec 修改了现有 Spec 的行为
+depends_on     — 新 Spec 依赖现有 Spec 的约束
+derived_from   — 新 Spec 从现有 Spec 派生
+violates       — 新 Spec 发现现有 Spec 有问题（触发 Spec Refinement）
+```
+
+## 31.5 测试策略调整
+
+对已有系统加特性，Test Engineering 要同时做：
+
+```text
+新特性的 AC → 新测试
++
+现有行为的回归测试（防止改坏）
++
+如果现有代码没有测试 → 先补测试再改
+```
+
+## 31.6 已有系统的状态机入口
+
+已有系统的 Work Item 不是从 `draft` 开始，而是从 `analyzing` 开始，但第一步是 Impact Analysis 而不是 Requirement Analysis：
+
+```text
+existing_system + RR-002
+  → Impact Analysis
+  → Spec Reconstruction（如果需要）
+  → 正常 RDD 流程（Requirement → Specification → Test → Implementation → Verification）
+```
+
+## 31.7 渐进式 Spec 覆盖
+
+已有系统不需要一次性补全所有 Spec。采用渐进式策略：
+
+```text
+第一次接触现有模块 → 补建相关 Spec（inferred）
+后续每次接触 → 验证或推翻 inferred Spec
+长期目标 → Spec 覆盖率逐步提升
+```
+
+这样 RDD 对已有系统是增量式的，不需要大规模重构。
+
+---
+
+# 32. RDD 实战反馈与改进
+
+基于真实项目（AnyCode Web 从 Nuxt 迁移到 Next.js）的 RDD 流程实战反馈。
+
+## 32.1 产物保质期
+
+RDD 把 Spec/Decision 定位为"first-class 持久产物"，但对一次性迁移场景，代码落地后 Spec 没有后续工作可做，就是脚手架。
+
+改进：每个 Work Item 声明保质期：
+
+```text
+permanent     — 长期存活的规格，后续迭代引用
+migration-only — 迁移脚手架，代码落地后自动归档
+session-only   — 临时分析产物，代码落地后删除
+```
+
+Feature 完成时自动产出 cleanup 清单。
+
+## 32.2 三种场景路径
+
+```text
+场景 A：增量改进（修改现有模块）→ Impact Analysis → Spec Reconstruction → 全链条
+场景 B：整体替换（删除旧模块）→ 不反推旧 Spec → Spec 从新行为派生 → 旧行为标 superseded
+场景 C：轻量变更（小改动）→ 简化 Spec → 直接实现 → 验证
+```
+
+场景 B 解决了"被替换的系统反推 Spec 是空转"的问题。
+
+## 32.3 Traceability ID 嵌入策略
+
+默认不把 ID 嵌入代码注释。改为单 manifest 文件（`.rdd/links.yml`）映射 file:line 区间到 AC id。删 Spec = 删一个 manifest，不是 40 处注释。
+
+若非要嵌入，技能必须带 detach 子命令干净剥离。
+
+## 32.4 状态机
+
+要么真 enforce（配 pre-commit 检查器），要么标 advisory（不强制）。不装。避免 aspirational 的状态机侵蚀产物可信度。
+
+## 32.5 Lite 通道
+
+对轻量场景缩减流程：RR 已是 Feature 时跳过 US 拆分、SPEC+TEST 合一文件、不嵌入 ID、不拆 state/traceability。全链条留给真正模糊的 greenfield。
+
+## 32.6 Verification 阶段
+
+跑真实 app（dev/prod）+ 浏览器自动化 + 性能对比比跑单测更接近"验证 Spec 被正确实现"。TC 标签是描述的描述，不要本末倒置。
+
+## 32.7 Git 作为产物库
+
+单人开发下，YAML 可能重复了 commit message 已记的东西。docs/specs/ 两三篇真文档 + commit message 扛住 80% 价值。.rdd/ 只放需要 Human-in-the-loop 的 Open Questions 和 frozen Decisions。
+
+---
+
 # 30. RDD 的最终定义
 
 RDD 可以最终定义为：
