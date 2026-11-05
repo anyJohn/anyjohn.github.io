@@ -91,22 +91,22 @@ refresh token 放 httpOnly cookie，access token 只活在内存里（上面的 
 ## 第三步：写领域接口
 
 ```ts
-// src/api/shares.ts
+// src/api/instances.ts
 import { request } from './client'
 
-export interface SharePage {
-  data: Array<{ name: string; location: string; created: string }>
+export interface InstancePage {
+  data: Array<{ name: string; location: string; version: string; created: string }>
   nextMarker: string | null
   total: number
 }
 
-export const sharesApi = {
+export const instancesApi = {
   list: (limit: number, marker = '') =>
-    request.get<SharePage>('/sfs/shares', { params: { limit, marker } }),
+    request.get<InstancePage>('/instances', { params: { limit, marker } }),
 
   metadata: (name: string) =>
     request.get<{ cluster: string; storageClass: string }>(
-      `/sfs/shares/${encodeURIComponent(name)}/metadata`,
+      `/instances/${encodeURIComponent(name)}/metadata`,
     ),
 }
 ```
@@ -116,25 +116,26 @@ export const sharesApi = {
 ## 第四步：在组件里用
 
 ```tsx
-// src/hooks/useShares.ts
+// src/hooks/useInstances.ts
 import { useEffect, useState } from 'react'
-import { sharesApi, type SharePage } from '../api/shares'
+import { instancesApi, type InstancePage } from '../api/instances'
+import type { AppError } from '../api/errors'
 
-export function useShares(marker: string) {
-  const [page, setPage] = useState<SharePage | null>(null)
+export function useInstances(marker: string) {
+  const [page, setPage] = useState<InstancePage | null>(null)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
+  const [error, setError] = useState<AppError | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()      // 取消句柄
     setLoading(true)
     setError(null)
 
-    sharesApi
+    instancesApi
       .list(50, marker, controller.signal)        // 传进 axios
       .then(setPage)
-      .catch((e) => {
-        if (e.name !== 'CanceledError') setError(e)   // 主动取消不算错误
+      .catch((e: AppError) => {
+        if (e.kind !== 'canceled') setError(e)   // 主动取消不算错误
       })
       .finally(() => setLoading(false))
 
@@ -149,7 +150,7 @@ export function useShares(marker: string) {
 
 ```ts
 list: (limit: number, marker = '', signal?: AbortSignal) =>
-  request.get<SharePage>('/sfs/shares', { params: { limit, marker }, signal }),
+  request.get<InstancePage>('/instances', { params: { limit, marker }, signal }),
 ```
 
 ## 第五步：跑起来
@@ -163,7 +164,7 @@ export default defineConfig({
 })
 ```
 
-然后组件里直接 `useShares('')` 就能拿到数据。
+然后组件里直接 `useInstances('')` 就能拿到数据。
 
 ---
 
@@ -194,7 +195,48 @@ export function toAppError(raw: unknown): AppError {
 }
 ```
 
-把它挂在响应拦截器的错误分支里，**所有上层拿到的都是 `AppError`**。组件根据 `kind` 决定是弹 toast、跳登录、还是显示重试按钮。
+### 挂进响应拦截器
+
+```ts
+// src/api/client.ts
+import { toAppError, type AppError } from './errors'
+
+http.interceptors.response.use(
+  (res) => res,                       // 成功路径原样返回,解包在 request 包装层做
+  (error) => {
+    const appError = toAppError(error)
+    if (appError.status === 401) redirectToLogin()
+    return Promise.reject(appError)
+  },
+)
+```
+
+三条规则:
+
+- 成功路径返回 `res` 而不是 `res.data`。解包放在包装层,类型才准(见第二步)。
+- 失败路径一律转成 `AppError`,包括主动取消。上层只认 `kind`,不用再判断 `AxiosError`、`CanceledError`、`ECONNABORTED` 这些原始形态。
+- 401 在这里触发跳转。自动刷新 token 的拦截器要**注册在这个之前**——响应拦截器按注册顺序执行。
+
+组件里的用法:
+
+```tsx
+try {
+  setPage(await instancesApi.list(50, marker, signal))
+} catch (e) {
+  const err = e as AppError
+  if (err.kind === 'canceled') return
+  setError(err)
+}
+```
+
+验证四种分支:
+
+| 操作 | 期望 `kind` |
+|---|---|
+| 断网后发请求 | `network` |
+| mock 返回 500 | `http` |
+| 请求在途时 unmount | `canceled` |
+| 后端返回业务失败码 | `business`,带 `code` |
 
 ## 竞态：慢请求覆盖快请求
 
@@ -217,6 +259,7 @@ useEffect(() => {
 最容易写错的场景。每个请求各自刷新 token → 刷新接口被刷爆 → 无限循环。正确做法是**第一个 401 触发刷新，其余请求排队等新 token**:
 
 ```ts
+// 注意:这个拦截器要注册在错误归一化之前(响应拦截器按注册顺序执行)
 let refreshing: Promise<string> | null = null
 
 http.interceptors.response.use(
@@ -298,7 +341,7 @@ import { setupServer } from 'msw/node'
 import { http as mswHttp, HttpResponse } from 'msw'
 
 export const server = setupServer(
-  mswHttp.get('/api/sfs/shares', () =>
+  mswHttp.get('/api/instances', () =>
     HttpResponse.json({ data: [], nextMarker: null, total: 0 }),
   ),
 )
@@ -320,7 +363,7 @@ export const server = setupServer(
 | 401 之后无限刷新 | 刷新接口本身也被 401 拦截器拦住了 | 判断 `config.url` 排除刷新接口 |
 | 请求路径变成 `/api/api/xxx` | baseURL 带了 `/api`,接口路径又写了一遍 | 二选一，保持约定 |
 | 跨域报 CORS | 开发环境直接打后端域名 | 用 Vite 代理，或后端开 CORS |
-| 取消后控制台一片红 | 把 `CanceledError` 当异常处理了 | `catch` 里先判断 `e.name === 'CanceledError'` |
+| 取消后控制台一片红 | 取消被当成错误处理了 | `catch` 里先判断 `e.kind === 'canceled'` |
 | 上传进度不动 | 没配 `onUploadProgress`,或服务端不支持分块 | 检查配置与后端 |
 | 跨域请求不携带 cookie | 缺 `withCredentials`,或后端 `Access-Control-Allow-Origin` 写了 `*` | 两边都开凭据模式；带凭据时 Origin 不能是通配符 |
 
